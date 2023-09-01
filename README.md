@@ -1,8 +1,8 @@
 # Data Validation
 
 [![Maintainer](http://img.shields.io/badge/maintainer-@giovannialo-blue.svg?style=flat-square)](https://github.com/giovannialo)
-[![Source Code](http://img.shields.io/badge/source-giovannialo/data-validation-blue.svg?style=flat-square)](https://github.com/giovannialo/data-validation)
-[![PHP from Packagist](https://img.shields.io/packagist/php-v/giovannialo/datalayer.svg?style=flat-square)](https://packagist.org/packages/giovannialo/data-validation)
+[![Source Code](http://img.shields.io/badge/source-giovannialo/datavalidation-blue.svg?style=flat-square)](https://github.com/giovannialo/data-validation)
+[![PHP from Packagist](https://img.shields.io/packagist/php-v/giovannialo/data-validation.svg?style=flat-square)](https://packagist.org/packages/giovannialo/data-validation)
 [![Latest Version](https://img.shields.io/github/release/giovannialo/data-validation.svg?style=flat-square)](https://github.com/giovannialo/data-validation/releases)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 [![Build](https://img.shields.io/scrutinizer/build/g/giovannialo/data-validation.svg?style=flat-square)](https://scrutinizer-ci.com/g/giovannialo/data-validation)

@@ -1,9 +1,9 @@
 <?php
 
-namespace Controllers;
+namespace Example\Controllers;
 
+use Example\Models\User;
 use GiovanniALO\DataValidation\Validation;
-use Models\User;
 
 class TestController
 {

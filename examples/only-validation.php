@@ -1,8 +1,8 @@
 <?php
 
-use GiovanniALO\DataValidation\Validation;
-
 require __DIR__.'/../vendor/autoload.php';
+
+use GiovanniALO\DataValidation\Validation;
 
 $data = [
     'first_name' => 'Giovanni',

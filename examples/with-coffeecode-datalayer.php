@@ -1,18 +1,17 @@
 <?php
 
-use CoffeeCode\Router\Router;
-use GiovanniALO\DataValidation\Repository\CoffeeCodeDataRepository;
-use GiovanniALO\DataValidation\Router\CoffeeCodeRouter;
-use GiovanniALO\DataValidation\Validation;
+require __DIR__.'/config-db.php';
 
 require __DIR__.'/../vendor/autoload.php';
-
-require __DIR__.'/config-db.php';
 
 require __DIR__.'/Controllers/TestController.php';
 
 require __DIR__.'/Models/User.php';
 
+use CoffeeCode\Router\Router;
+use GiovanniALO\DataValidation\Repository\CoffeeCodeDataRepository;
+use GiovanniALO\DataValidation\Router\CoffeeCodeRouter;
+use GiovanniALO\DataValidation\Validation;
 
 $router = new Router('http://localhost/data-validation');
 

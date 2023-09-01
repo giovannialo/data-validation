@@ -79,7 +79,7 @@ class Validation
     protected function prepareData(array $data): void
     {
         if ($this->router) {
-            self::$instance->data = self::$instance->router->data() ?? [];
+            self::$instance->data = self::$instance?->router?->data() ?? [];
         } else {
             self::$instance->data = $data;
         }
@@ -269,7 +269,7 @@ class Validation
     {
         [$namespace, $column] = explode(',', $str);
 
-        return $this->repository->find(
+        return $this?->repository?->find(
             $namespace,
             "{$column} = :{$column}",
             [$column => $value]

@@ -23,5 +23,5 @@ $router->dispatch();
 if ($router->error()) {
     echo $router->error();
 
-    die;
+    exit;
 }

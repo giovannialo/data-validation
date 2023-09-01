@@ -19,10 +19,10 @@ class Validation
      * @param  array  $errors
      */
     private function __construct(
-        protected ?RouterInterface $router,
-        protected ?DataRepository $repository,
-        protected array $data = [],
-        protected array $errors = []
+        private ?RouterInterface $router,
+        private ?DataRepository $repository,
+        private array $data = [],
+        private array $errors = []
     ) {
     }
 
@@ -47,26 +47,16 @@ class Validation
     {
         self::$instance->prepareData($data);
 
-        foreach ($rules as $field => $rule) {
-            $rules = is_array($rule) ? $rule : explode('|', $rule);
+        foreach ($rules as $field => $ruleDefinitions) {
+            $parsedRules = self::$instance->parseRules($ruleDefinitions);
 
             $value = self::$instance->data[$field] ?? '';
 
-            if (!$value && !in_array('required', $rules)) {
+            if (!$value && !self::$instance->isRequired($parsedRules)) {
                 continue;
             }
 
-            foreach ($rules as $filter) {
-                if (strpos($filter, ':')) {
-                    [$filter, $param] = explode(':', $filter);
-                }
-
-                self::$instance->$filter($field, $value, $param ?? '');
-
-                if (!$value && $filter == 'required') {
-                    break;
-                }
-            }
+            self::$instance->applyFilters($field, $value, $parsedRules);
         }
 
         self::$instance->render();
@@ -76,7 +66,7 @@ class Validation
      * @param  array  $data
      * @return void
      */
-    protected function prepareData(array $data): void
+    private function prepareData(array $data): void
     {
         if ($this->router) {
             self::$instance->data = self::$instance?->router?->data() ?? [];
@@ -86,11 +76,57 @@ class Validation
     }
 
     /**
+     * @param  array|string  $ruleDefinitions
+     * @return array
+     */
+    private function parseRules(array|string $ruleDefinitions): array
+    {
+        return is_array($ruleDefinitions)
+            ? $ruleDefinitions
+            : explode('|', $ruleDefinitions);
+    }
+
+    /**
+     * @param  array  $parsedRules
+     * @return bool
+     */
+    private function isRequired(array $parsedRules): bool
+    {
+        return in_array('required', $parsedRules);
+    }
+
+    /**
+     * @param  string  $field
+     * @param  mixed  $value
+     * @param  array  $parsedRules
+     * @return void
+     */
+    private function applyFilters(
+        string $field,
+        mixed $value,
+        array $parsedRules
+    ): void {
+        foreach ($parsedRules as $filter) {
+            $params = '';
+
+            if (strpos($filter, ':')) {
+                [$filter, $params] = explode(':', $filter);
+            }
+
+            self::$instance->$filter($field, $value, $params);
+
+            if (!$value && $filter == 'required') {
+                break;
+            }
+        }
+    }
+
+    /**
      * @param  string  $field
      * @param $value
      * @return void
      */
-    protected function string(string $field, $value): void
+    private function string(string $field, $value): void
     {
         if (!is_string($value)) {
             $this->errors[$field][] = 'Deve ser uma string';
@@ -102,7 +138,7 @@ class Validation
      * @param  string  $value
      * @return void
      */
-    protected function integer(string $field, string $value): void
+    private function integer(string $field, string $value): void
     {
         if (!filter_var($value, FILTER_VALIDATE_INT)) {
             $this->errors[$field][] = 'Deve ser um número inteiro';
@@ -114,7 +150,7 @@ class Validation
      * @param  string  $value
      * @return void
      */
-    protected function float(string $field, string $value): void
+    private function float(string $field, string $value): void
     {
         if (!filter_var($value, FILTER_VALIDATE_FLOAT)) {
             $this->errors[$field][] = 'Deve ser um número decimal';
@@ -126,7 +162,7 @@ class Validation
      * @param  string  $value
      * @return void
      */
-    protected function boolean(string $field, string $value): void
+    private function boolean(string $field, string $value): void
     {
         if (!filter_var($value, FILTER_VALIDATE_BOOLEAN)) {
             $this->errors[$field][] = 'Deve ser um valor booleano';
@@ -138,7 +174,7 @@ class Validation
      * @param  string  $value
      * @return void
      */
-    protected function date(string $field, string $value): void
+    private function date(string $field, string $value): void
     {
         if (!strtotime($value)) {
             $this->errors[$field][] = 'Deve ser uma data válida';
@@ -150,7 +186,7 @@ class Validation
      * @param  string  $value
      * @return void
      */
-    protected function url(string $field, string $value): void
+    private function url(string $field, string $value): void
     {
         if (!filter_var($value, FILTER_VALIDATE_URL)) {
             $this->errors[$field][] = 'Deve ser uma URL válida';
@@ -162,7 +198,7 @@ class Validation
      * @param  string  $value
      * @return void
      */
-    protected function required(string $field, string $value): void
+    private function required(string $field, string $value): void
     {
         if (!$value) {
             $this->errors[$field][] = 'É obrigatório';
@@ -174,7 +210,7 @@ class Validation
      * @param  string  $value
      * @return void
      */
-    protected function email(string $field, string $value): void
+    private function email(string $field, string $value): void
     {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
             $this->errors[$field][] = 'Deve ser um endereço de e-mail válido';
@@ -187,7 +223,7 @@ class Validation
      * @param  int  $length
      * @return void
      */
-    protected function min(string $field, string $value, int $length): void
+    private function min(string $field, string $value, int $length): void
     {
         if (strlen($value) < $length) {
             $this->errors[$field][] = 'Deve conter pelo menos '.$length.' caracteres';
@@ -200,7 +236,7 @@ class Validation
      * @param  int  $length
      * @return void
      */
-    protected function max(string $field, string $value, int $length): void
+    private function max(string $field, string $value, int $length): void
     {
         if (strlen($value) > $length) {
             $this->errors[$field][] = 'Deve conter no máximo '.$length.' caracteres';
@@ -212,7 +248,7 @@ class Validation
      * @param  string  $value
      * @return void
      */
-    protected function password(string $field, string $value): void
+    private function password(string $field, string $value): void
     {
         if (!preg_match('/^(?=.[a-z])(?=.[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/', $value)) {
             $this->errors[$field][] = 'Deve conter pelo menos 8 caracteres, uma'.
@@ -225,7 +261,7 @@ class Validation
      * @param  string  $value
      * @return void
      */
-    protected function confirmation(string $field, string $value): void
+    private function confirmation(string $field, string $value): void
     {
         if (!isset($this->data[$field.'_confirmation'])) {
             $this->errors[$field][] = 'A confirmação é obrigatória';
@@ -240,7 +276,7 @@ class Validation
      * @param  string  $str
      * @return void
      */
-    protected function unique(string $field, string $value, string $str): void
+    private function unique(string $field, string $value, string $str): void
     {
         if ($this->findInDatabase($value, $str)) {
             $this->errors[$field][] = 'Já está em uso';
@@ -253,7 +289,7 @@ class Validation
      * @param  string  $str
      * @return void
      */
-    protected function exists(string $field, string $value, string $str): void
+    private function exists(string $field, string $value, string $str): void
     {
         if (!$this->findInDatabase($value, $str)) {
             $this->errors[$field][] = 'Não existe no banco de dados';
@@ -279,7 +315,7 @@ class Validation
     /**
      * @return void
      */
-    protected function render(): void
+    private function render(): void
     {
         if (count($this->errors)) {
             http_response_code(400);
